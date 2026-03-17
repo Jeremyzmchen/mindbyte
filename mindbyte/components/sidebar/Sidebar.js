@@ -95,7 +95,7 @@ const Sidebar = () => {
     const { data: session } = useSession();
 
     // 折叠/展开状态
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
 
     // 顶部用户名下拉
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
