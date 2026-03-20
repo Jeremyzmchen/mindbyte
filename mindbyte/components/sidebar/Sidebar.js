@@ -42,9 +42,11 @@ const projectItems = [
 ];
 
 const recentItems = [
-    { text: "Create Course",   icon: <SchoolIcon />,   link: "/dashboard/admin/create/course" },
-    { text: "Create Tutorial", icon: <MenuBookIcon />, link: "/dashboard/admin/create/content" },
-    { text: "Create Category", icon: <CategoryIcon />, link: "/dashboard/admin/create/category" },
+    { text: "Create Course",      icon: <SchoolIcon />,   link: "/dashboard/admin/create/course" },
+    { text: "Create Tutorial",    icon: <MenuBookIcon />, link: "/dashboard/admin/create/content" },
+    { text: "Create Category",    icon: <CategoryIcon />, link: "/dashboard/admin/create/category" },
+    { text: "Create SubCategory", icon: <CategoryIcon />, link: "/dashboard/admin/create/subcategory" },
+    { text: "Create Category with SubCategory", icon: <CategoryIcon />, link: "/dashboard/admin/create/categorywithsubs" },
 ];
 
 // 单个菜单项
