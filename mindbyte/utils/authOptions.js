@@ -72,6 +72,7 @@ export const authOptions = {
 
         // JWT 回调：把用户信息和角色写入 token
         jwt: async ({ token }) => {
+            await dbConnect();
             const userByEmail = await User.findOne({ email: token.email });
 
             if (userByEmail) {

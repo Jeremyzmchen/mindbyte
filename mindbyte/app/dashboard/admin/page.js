@@ -1,9 +1,9 @@
 "use client"
 
 import { Box, Typography } from '@mui/material';
-import Sidebar from "@/components/sidebar/Sidebar";
 import { useState } from "react";
-
+import dynamic from "next/dynamic";
+const Sidebar = dynamic(() => import("@/components/sidebar/Sidebar"), { ssr: false });
 const AdminDashboardPage = () => {
     // 和 Sidebar 共享折叠状态，控制主内容区的左边距
     const [collapsed, setCollapsed] = useState(false);

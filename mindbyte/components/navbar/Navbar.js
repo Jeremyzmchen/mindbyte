@@ -81,7 +81,7 @@ const Navbar = () => {
                             sx={{
                                 cursor: "pointer",
                                 color: "#555",
-                                fontSize: 15,
+                                fontSize: 18,
                                 "&:hover": { color: "#000" },
                             }}
                         >
