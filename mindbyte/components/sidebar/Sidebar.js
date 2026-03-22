@@ -42,7 +42,7 @@ const projectItems = [
 ];
 
 const recentItems = [
-    { text: "Create Course",      icon: <SchoolIcon />,   link: "/dashboard/admin/create/course" },
+    { text: "Create Course",      icon: <SchoolIcon />,   link: "/dashboard/admin/content" },
     { text: "Create Tutorial",    icon: <MenuBookIcon />, link: "/dashboard/admin/create/content" },
     { text: "Create Category",    icon: <CategoryIcon />, link: "/dashboard/admin/create/category" },
     { text: "Create SubCategory", icon: <CategoryIcon />, link: "/dashboard/admin/create/subcategory" },

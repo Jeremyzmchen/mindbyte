@@ -15,8 +15,8 @@ const ResponsiveCards = () => {
             <Sidebar />
 
             <Box sx={{ marginLeft: "64px" }}>
-                <MultimediaCard />
                 <CourseCard />
+                <MultimediaCard />
             </Box>
         </>
     )

@@ -58,7 +58,28 @@ const Footer = () => {
         }}>
             <Grid container spacing={1} alignItems="flex-start">
 
-                {/* 左侧：主分类 + 子分类链接 */}
+                {/* 左侧：About Us */}
+                <Grid size={{ xs: 12, md: 2 }} sx={{ alignSelf: "flex-start" }}>
+                    <Typography fontWeight="bold" sx={{ fontSize: "12px", letterSpacing: 1.5, textTransform: "uppercase", mb: 1.5 }}>
+                        About Us
+                    </Typography>
+                    <Typography sx={{ color: "#666", lineHeight: 1.8, fontSize: "12px", mb: 2 }}>
+                        MindByte is a video-based learning platform designed to make knowledge simple, practical, and accessible.
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><GitHub fontSize="small" /></IconButton>
+                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><LinkedIn fontSize="small" /></IconButton>
+                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><Instagram fontSize="small" /></IconButton>
+                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><YouTube fontSize="small" /></IconButton>
+                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><Twitter fontSize="small" /></IconButton>
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style={{ maxWidth: "120px", height: "auto" }} />
+                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" style={{ maxWidth: "120px", height: "auto" }} />
+                    </Box>
+                </Grid>
+
+                {/* 右侧：主分类 + 子分类链接 */}
                 {loading ? (
                     <Grid size={{ xs: 12 }} sx={{ textAlign: "center" }}>
                         <CircularProgress sx={{ color: "black" }} />
@@ -101,28 +122,6 @@ const Footer = () => {
                         </Grid>
                     ))
                 )}
-
-                {/* 右侧：About Us */}
-                <Grid size={{ xs: 12, md: 2 }} sx={{ alignSelf: "flex-start" }}>
-                    <Typography fontWeight="bold" sx={{ fontSize: "12px", letterSpacing: 1.5, textTransform: "uppercase", mb: 1.5 }}>
-                        About Us
-                    </Typography>
-                    <Typography sx={{ color: "#666", lineHeight: 1.8, fontSize: "12px", mb: 2 }}>
-                        MindByte is a video-based learning platform designed to make knowledge simple, practical, and accessible.
-                    </Typography>
-                    <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><GitHub fontSize="small" /></IconButton>
-                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><LinkedIn fontSize="small" /></IconButton>
-                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><Instagram fontSize="small" /></IconButton>
-                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><YouTube fontSize="small" /></IconButton>
-                        <IconButton size="small" sx={{ color: "black", p: 0.5 }}><Twitter fontSize="small" /></IconButton>
-                    </Box>
-                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style={{ maxWidth: "120px", height: "auto" }} />
-                        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" style={{ maxWidth: "120px", height: "auto" }} />
-                    </Box>
-                </Grid>
-
             </Grid>
         </Box>
     );

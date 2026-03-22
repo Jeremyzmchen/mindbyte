@@ -1,8 +1,10 @@
 "use client"
 
 import { Grid, Typography, Button, Box } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const CourseCard = () => {
+    const router = useRouter();
     return (
         <Box>
             <Grid
@@ -75,6 +77,7 @@ const CourseCard = () => {
                             fontWeight: "bold",
                             fontSize: "16px",
                         }}
+                        onClick={() => router.push("/dashboard/admin/create/content")}
                     >
                         Get Started
                     </Button>
