@@ -4,6 +4,8 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Provider } from "react-redux";
 import { store } from "@/store";
+import { ToastContainer } from "react-toastify";     
+import "react-toastify/dist/ReactToastify.css";      
 
 export default function RootLayout({ children }) {
     return (
@@ -12,6 +14,7 @@ export default function RootLayout({ children }) {
                 <SessionProvider>
                     <Provider store={store}>
                         {children}
+                        <ToastContainer />     
                     </Provider>
                 </SessionProvider>
             </body>
