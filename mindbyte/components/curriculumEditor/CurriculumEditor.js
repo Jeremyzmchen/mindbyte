@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
 
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,6 +13,13 @@ import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
 import NotesIcon from '@mui/icons-material/Notes';
 import PersonalVideoIcon from '@mui/icons-material/PersonalVideo';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import MarkdownIt from "markdown-it";
+import MdEditor from "react-markdown-editor-lite";
+import 'react-markdown-editor-lite/lib/index.css';
+import hljs from "highlight.js";
+import 'highlight.js/styles/monokai.css';
+
+import { imageUpload } from "../editFunctions/Upload";
 
 
 
@@ -319,6 +327,83 @@ const CurriculumEditor = () => {
         }
     }
 
+
+
+    const [openModal, setOpenModal] = useState(false)
+    const [currentLecture, setCurrentLecture] = useState(null)
+    const [content, setContent] = useState("")
+    const [currentSectionIndex, setCurrentSectionIndex] = useState(null)
+
+    const handleOpenModal = (lecture, sectionIndex) => {
+        setCurrentSectionIndex(sectionIndex)
+        setCurrentLecture(lecture)
+        setContent(lecture?.content || "")
+        setOpenModal(true)
+    }
+
+    const handleCloseModal = () => {
+        setOpenModal(false)
+        setCurrentLecture(null)
+        setContent("")
+        setCurrentSectionIndex(null)
+    }
+
+    const md = new MarkdownIt({
+
+        highlight: (str, lang) => {
+            const language = lang && hljs.getLanguage(lang) ? lang : "js"
+
+            try {
+                const highlightedCode = hljs.highlight(language, str, true).value
+                return `
+                <pre class="hljs">
+                <code>${highlightedCode}</code>
+                </pre>
+                `
+            } catch (error) {
+                return ""
+            }
+        }
+    })
+
+    const handleSaveContent = async () => {
+        const sectionId = curriculum[currentSectionIndex]?._id
+        const lectureItem = {
+            ...currentLecture,
+            content,
+        }
+
+        const data = {
+            sectionId,
+            lectureItem,
+            search,
+        }
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/admin/curriculum/section/lecture/content/${lectureItem?._id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+
+        if (res.ok) {
+            toast.success("Content Updated")
+            setCurriculum((prevSections) => prevSections.map((section) => ({
+                ...section,
+                lectures: section?.lectures.map((lecture) => (
+                    lecture?._id === currentLecture?._id ? { ...lecture, content } : lecture
+                ))
+            })))
+        } else {
+            toast.error("Content Update Failed")
+            console.log("Failed to update lecture content")
+        }
+
+        handleCloseModal()
+    }
+
+
     return (
         <Box sx={{ display: "flex" }}>
             <Sidebar />
@@ -525,7 +610,9 @@ const CurriculumEditor = () => {
                                             </Typography>
 
                                             <Box>
-                                                <IconButton>
+                                                <IconButton
+                                                    onClick={() => handleOpenModal(lecture, sectionIndex)}
+                                                >
                                                     {
                                                         lecture?.content ? (
                                                             <LibraryAddCheckIcon
@@ -659,11 +746,79 @@ const CurriculumEditor = () => {
                     >
                         Add Section
                     </Button>
+
+                    <Modal
+                        open={openModal}
+                        onClose={handleCloseModal}
+                    >
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%,-50%)",
+                                width: "80%",
+                                backgroundColor: "white",
+                                color: "black",
+                                padding: "5px",
+
+                            }}
+                        >
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    mb: 3,
+
+                                }}
+                            >Edit Lecture {" "} : {currentLecture?.title} </Typography>
+
+                            <MdEditor
+                                value={content}
+                                style={{
+
+                                    height: "80vh",
+
+                                }}
+                                onChange={({ text }) => setContent(text)}
+                                renderHTML={(text) => md.render(text)}
+
+                                placeholder="write your content here"
+                                onImageUpload={(file) => imageUpload(file)}
+                            />
+
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    mt: 3,
+                                    justifyContent: "flex-end",
+                                }}
+
+                            >
+                                <Button
+                                    variant="contained"
+                                    onClick={handleCloseModal}
+                                    sx={{
+                                        marginRight: "8px",
+                                    }}
+                                >Cancel</Button>
+
+                                <Button
+                                    variant="outline"
+                                    onClick={handleSaveContent}
+                                    sx={{
+                                        marginRight: "8px",
+                                    }}
+                                >Save</Button>
+
+                            </Box>
+
+                        </Box>
+                    </Modal>
                 </Box>
             </Box>
         </Box>
     )
-
 }
+
 
 export default CurriculumEditor
