@@ -1,17 +1,20 @@
 "use client"
 
+import { Box } from '@mui/material';
 import dynamic from "next/dynamic";
 
 const Sidebar = dynamic(() => import("@/components/sidebar/Sidebar"), { ssr: false });
 const SubCategoryManager = dynamic(() => import("@/components/admin/subCategoryManager/subCategoryManager"), { ssr: false });
 
-const CourseCreate = () => {
+const SubCategoryPage = () => {
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#f0f0f0' }}>
+        <Box sx={{ display: "flex", backgroundColor: "#f9fafb", minHeight: "100vh" }}>
             <Sidebar />
-            <SubCategoryManager />
-        </div>
+            <Box component="main" sx={{ marginLeft: "64px", flexGrow: 1, minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+                <SubCategoryManager />
+            </Box>
+        </Box>
     );
 };
 
-export default CourseCreate;
+export default SubCategoryPage;

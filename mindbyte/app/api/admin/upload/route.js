@@ -40,7 +40,7 @@ const s3 = new S3Client({
       await s3.send(command);
   
       // 拼接 S3 文件的公开 URL
-      const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+      const url = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${fileName}`;
   
       return NextResponse.json({ url });
   

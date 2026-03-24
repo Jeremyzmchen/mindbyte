@@ -1,6 +1,14 @@
 "use client"
 
 import React, { useState } from "react";
+
+const fixS3Url = (url) => {
+    if (!url) return url;
+    return url.replace(
+        /^https:\/\/(.+?)\.s3\.([^.]+)\.amazonaws\.com\/(.+)$/,
+        'https://s3.$2.amazonaws.com/$1/$3'
+    );
+};
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
@@ -95,7 +103,7 @@ const Navbar = () => {
                     {status === "authenticated" ? (
                         // 已登录：显示头像，点击弹出下拉菜单
                         <img
-                            src={session?.user?.image ?? "/images/avatar.png"}
+                            src={fixS3Url(session?.user?.image) ?? "/images/avatar.png"}
                             alt="User Avatar"
                             style={{
                                 width: "40px",
@@ -118,7 +126,7 @@ const Navbar = () => {
                 <Box display={{ xs: "flex", md: "none" }} ml="auto" alignItems="center" gap={1}>
                     {status === "authenticated" && (
                         <img
-                            src={session?.user?.image ?? "/images/avatar.png"}
+                            src={fixS3Url(session?.user?.image) ?? "/images/avatar.png"}
                             alt="User Avatar"
                             style={{
                                 width: "34px",

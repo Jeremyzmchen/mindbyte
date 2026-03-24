@@ -1,33 +1,20 @@
 "use client"
 
-//import CurriculumEditor  from "@/components/CurriculumEditor/CurriculumEditor"
-import {
-    Box,
+import { Box } from '@mui/material';
+import dynamic from "next/dynamic";
 
-} from '@mui/material';
-import Sidebar from "@/components/sidebar/Sidebar";
-import CategoryManager from "@/components/admin/categoryManager/CategoryManager";
+const Sidebar = dynamic(() => import("@/components/sidebar/Sidebar"), { ssr: false });
+const CategoryManager = dynamic(() => import("@/components/admin/categoryManager/CategoryManager"), { ssr: false });
 
-
-const CourseCreate = () => {
-
-
+const CategoryPage = () => {
     return (
-
-        <Box
-            sx={{
-                minHeight: '100vh',
-                backgroundColor: '#f0f0f0', // Exact dark background
-
-            }}
-        >categories
-
-
-            <Sidebar/>
-            <CategoryManager/>
-
+        <Box sx={{ display: "flex", backgroundColor: "#f9fafb", minHeight: "100vh" }}>
+            <Sidebar />
+            <Box component="main" sx={{ marginLeft: "64px", flexGrow: 1, minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+                <CategoryManager />
+            </Box>
         </Box>
-
     );
 };
-export default CourseCreate;
+
+export default CategoryPage;

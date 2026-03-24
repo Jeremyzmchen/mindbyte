@@ -1,125 +1,114 @@
 "use client"
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
     Box, Typography, List, ListItem,
-    ListItemIcon, ListItemText, Divider,
-    IconButton, Collapse, Menu, MenuItem, Tooltip,
+    ListItemIcon, ListItemText,
+    IconButton, Menu, MenuItem, Divider, Tooltip,
 } from "@mui/material";
 
-// 图标
-import HomeIcon from "@mui/icons-material/Home";
-import SearchIcon from "@mui/icons-material/Search";
-import SettingsIcon from "@mui/icons-material/Settings";
-import GridViewIcon from "@mui/icons-material/GridView";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import GroupIcon from "@mui/icons-material/Group";
-import AddIcon from "@mui/icons-material/Add";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import CategoryIcon from "@mui/icons-material/Category";
+import DashboardIcon from "@mui/icons-material/GridView";
 import SchoolIcon from "@mui/icons-material/School";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import BoltIcon from "@mui/icons-material/Bolt";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import CategoryIcon from "@mui/icons-material/Category";
+import GroupIcon from "@mui/icons-material/Group";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import MenuIcon from "@mui/icons-material/Menu";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 
+const fixS3Url = (url) => {
+    if (!url) return url;
+    return url.replace(
+        /^https:\/\/(.+?)\.s3\.([^.]+)\.amazonaws\.com\/(.+)$/,
+        'https://s3.$2.amazonaws.com/$1/$3'
+    );
+};
 
-// 菜单数据
-const mainItems = [
-    { text: "Home",      icon: <HomeIcon />,         link: "/" },
-    { text: "Search",    icon: <SearchIcon />,        link: "/search" },
-    { text: "Resources", icon: <SettingsIcon />,      link: "/resources" },
+// 颜色常量 — Charcoal Minimal
+const C = {
+    bg: "#ffffff",
+    active_bg: "#f3f4f6",
+    active_border: "#111827",
+    active_text: "#111827",
+    active_icon: "#111827",
+    text: "#374151",
+    icon: "#9ca3af",
+    hover_bg: "#f9fafb",
+    label: "#9ca3af",
+    logo_bg: "#111827",
+};
+
+const navItems = [
+    { text: "Dashboard",  icon: <DashboardIcon fontSize="small" />,    link: "/dashboard/admin" },
+    { text: "Courses",    icon: <SchoolIcon fontSize="small" />,        link: "/dashboard/admin/content" },
+    { text: "Categories", icon: <CategoryIcon fontSize="small" />,      link: "/dashboard/admin/create/category" },
+    { text: "Users",      icon: <GroupIcon fontSize="small" />,         link: "/dashboard/admin/alluser" },
+    { text: "Profile",    icon: <PersonOutlineIcon fontSize="small" />, link: "/dashboard/admin/profile" },
 ];
 
-const projectItems = [
-    { text: "All Courses",    icon: <GridViewIcon />,       link: "/dashboard/admin" },
-    { text: "Starred",        icon: <StarBorderIcon />,     link: "/dashboard/admin/starred" },
-    { text: "Created by me",  icon: <PersonOutlineIcon />,  link: "/dashboard/admin/create/course" },
-    { text: "All Users",      icon: <GroupIcon />,          link: "/dashboard/admin/alluser" },
+const bottomItems = [
+    { text: "Settings", icon: <SettingsIcon fontSize="small" />, link: "/settings" },
+    { text: "Help",     icon: <HelpOutlineIcon fontSize="small" />, link: "/help" },
 ];
 
-const recentItems = [
-    { text: "Create Course",      icon: <SchoolIcon />,   link: "/dashboard/admin/content" },
-    { text: "Create Tutorial",    icon: <MenuBookIcon />, link: "/dashboard/admin/create/content" },
-    { text: "Create Category",    icon: <CategoryIcon />, link: "/dashboard/admin/create/category" },
-    { text: "Create SubCategory", icon: <CategoryIcon />, link: "/dashboard/admin/create/subcategory" },
-    { text: "Create Category with SubCategory", icon: <CategoryIcon />, link: "/dashboard/admin/create/categorywithsubs" },
-];
-
-// 单个菜单项
-// collapsed 时只显示图标，展开时显示图标+文字
-const SidebarItem = ({ item, onClick, collapsed }) => (
+const SidebarItem = ({ item, collapsed, active, onClick }) => (
     <Tooltip title={collapsed ? item.text : ""} placement="right">
         <ListItem
             onClick={() => onClick(item.link)}
             sx={{
-                borderRadius: 2,
+                borderRadius: "8px",
                 mb: 0.5,
                 cursor: "pointer",
+                px: collapsed ? 1.5 : 1.5,
+                py: 1,
                 justifyContent: collapsed ? "center" : "flex-start",
-                px: collapsed ? 1 : 2,
-                "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
+                position: "relative",
+                backgroundColor: active ? C.active_bg : "transparent",
+                borderLeft: active ? `3px solid ${C.active_border}` : "3px solid transparent",
+                "&:hover": { backgroundColor: active ? C.active_bg : C.hover_bg },
+                transition: "background-color 0.15s ease",
             }}
         >
-            <ListItemIcon sx={{ minWidth: collapsed ? "auto" : 36, color: "#555" }}>
+            <ListItemIcon sx={{ minWidth: collapsed ? "auto" : 34, color: active ? C.active_icon : C.icon }}>
                 {item.icon}
             </ListItemIcon>
             {!collapsed && (
                 <ListItemText
                     primary={item.text}
-                    primaryTypographyProps={{ fontSize: 14, color: "#333" }}
+                    primaryTypographyProps={{
+                        fontSize: 14,
+                        fontWeight: active ? 600 : 400,
+                        color: active ? C.active_text : C.text,
+                    }}
                 />
             )}
         </ListItem>
     </Tooltip>
 );
 
-// 分组标题（折叠时隐藏）
-const SectionLabel = ({ label, collapsed }) => {
-    if (collapsed) return <Divider sx={{ my: 1, borderColor: "#ebe8e3" }} />;
-    return (
-        <Typography
-            variant="caption"
-            sx={{ px: 2, py: 1, color: "#aaa", fontWeight: 600, display: "block" }}
-        >
-            {label}
-        </Typography>
-    );
-};
-
-
-// Sidebar 主组件
 const Sidebar = () => {
     const router = useRouter();
+    const pathname = usePathname();
     const { data: session } = useSession();
-
-    // 折叠/展开状态
     const [collapsed, setCollapsed] = useState(true);
-
-    // 顶部用户名下拉
-    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-
-    // 底部头像菜单
     const [anchorEl, setAnchorEl] = useState(null);
     const menuOpen = Boolean(anchorEl);
 
     const handleNavigate = (link) => router.push(link);
 
-    // 折叠时宽度 64px，展开时 260px
-    const sidebarWidth = collapsed ? 64 : 260;
+    const sidebarWidth = collapsed ? 64 : 220;
 
     return (
         <Box
             sx={{
                 width: sidebarWidth,
                 height: "100vh",
-                backgroundColor: "#f9f5f0",
+                backgroundColor: C.bg,
                 display: "flex",
                 flexDirection: "column",
-                borderRight: "1px solid #ebe8e3",
                 position: "fixed",
                 left: 0,
                 top: 0,
@@ -128,249 +117,144 @@ const Sidebar = () => {
                 overflow: "hidden",
             }}
         >
-            {/* ── 顶部：Logo + 折叠按钮 ── */}
+            {/* ── Logo + 折叠按钮 ── */}
             <Box
                 sx={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: collapsed ? "center" : "space-between",
-                    px: collapsed ? 1 : 2,
+                    px: collapsed ? 1.5 : 2,
                     py: 1.5,
+                    minHeight: 56,
                 }}
             >
-                {/* Logo（折叠时只显示图标） */}
                 {!collapsed && (
                     <Box
                         onClick={() => router.push("/")}
-                        sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+                        sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
                     >
-                        <img src="/images/logo.png" alt="logo" style={{ width: 32, height: 32 }} />
+                        <Box
+                            sx={{
+                                width: 28, height: 28,
+                                backgroundColor: C.logo_bg,
+                                borderRadius: "6px",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0,
+                            }}
+                        >
+                            <Typography sx={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>M</Typography>
+                        </Box>
+                        <Box>
+                            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#111827", lineHeight: 1 }}>MindByte</Typography>
+                            <Typography sx={{ fontSize: 10, color: C.label, lineHeight: 1.4 }}>Learning Portal</Typography>
+                        </Box>
                     </Box>
                 )}
 
-                {/* 折叠/展开按钮 */}
-                <Tooltip title={collapsed ? "Open sidebar" : "Close sidebar"} placement="right">
-                    <IconButton
-                        onClick={() => {
-                            setCollapsed(!collapsed);
-                            setUserDropdownOpen(false);
+                {collapsed && (
+                    <Box
+                        onClick={() => router.push("/")}
+                        sx={{
+                            width: 28, height: 28,
+                            backgroundColor: C.logo_bg,
+                            borderRadius: "6px",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            cursor: "pointer",
                         }}
-                        size="small"
-                        sx={{ color: "#888", "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" } }}
                     >
-                        {collapsed ? <MenuIcon /> : <MenuOpenIcon />}
-                    </IconButton>
-                </Tooltip>
+                        <Typography sx={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>M</Typography>
+                    </Box>
+                )}
+
+                {!collapsed && (
+                    <Tooltip title="Collapse sidebar" placement="right">
+                        <IconButton
+                            onClick={() => setCollapsed(true)}
+                            size="small"
+                            sx={{ color: C.icon, "&:hover": { backgroundColor: C.hover_bg } }}
+                        >
+                            <MenuOpenIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Box>
 
-            {/* ── 用户名下拉（展开时显示）── */}
-            {!collapsed && (
-                <Box sx={{ px: 2, mb: 1 }}>
-                    <Box
-                        onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            backgroundColor: "#fff",
-                            borderRadius: 2,
-                            px: 1.5, py: 1,
-                            cursor: "pointer",
-                            border: "1px solid #ebe8e3",
-                            "&:hover": { backgroundColor: "#f5f0ea" },
-                        }}
-                    >
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <Box
-                                sx={{
-                                    width: 28, height: 28,
-                                    borderRadius: 1,
-                                    backgroundColor: "#c0392b",
-                                    color: "#fff",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 13, fontWeight: "bold", flexShrink: 0,
-                                }}
-                            >
-                                {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
-                            </Box>
-                            <Typography fontSize={14} fontWeight={500} color="#333" noWrap>
-                                {session?.user?.name ?? "My Workspace"}
-                            </Typography>
-                        </Box>
-                        <KeyboardArrowDownIcon
-                            sx={{
-                                fontSize: 18, color: "#aaa",
-                                transition: "transform 0.2s",
-                                transform: userDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
-                                flexShrink: 0,
-                            }}
-                        />
-                    </Box>
-
-                    {/* 下拉内容（暂时为空） */}
-                    <Collapse in={userDropdownOpen}>
-                        <Box
-                            sx={{
-                                mt: 1, p: 2,
-                                backgroundColor: "#fff",
-                                borderRadius: 2,
-                                border: "1px solid #ebe8e3",
-                            }}
-                        >
-                            <Typography fontSize={13} color="#aaa">Coming soon...</Typography>
-                        </Box>
-                    </Collapse>
-                </Box>
-            )}
-
-            {/* 折叠时显示用户首字母头像 */}
+            {/* 折叠时展开按钮 */}
             {collapsed && (
                 <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-                    <Box
-                        sx={{
-                            width: 32, height: 32,
-                            borderRadius: 1,
-                            backgroundColor: "#c0392b",
-                            color: "#fff",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 14, fontWeight: "bold", cursor: "pointer",
-                        }}
-                        onClick={() => setCollapsed(false)}
-                    >
-                        {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
-                    </Box>
+                    <Tooltip title="Expand sidebar" placement="right">
+                        <IconButton
+                            onClick={() => setCollapsed(false)}
+                            size="small"
+                            sx={{ color: C.icon, "&:hover": { backgroundColor: C.hover_bg } }}
+                        >
+                            <MenuIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
             )}
 
-            {/* ── 菜单内容（可滚动）── */}
+            {/* ── 主导航 ── */}
             <Box sx={{ flexGrow: 1, overflowY: "auto", overflowX: "hidden", px: 1 }}>
-
+                {!collapsed && (
+                    <Typography sx={{ px: 1.5, pb: 0.5, pt: 1, fontSize: 11, fontWeight: 600, color: C.label, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        Main Menu
+                    </Typography>
+                )}
                 <List disablePadding>
-                    {mainItems.map((item, i) => (
-                        <SidebarItem key={i} item={item} onClick={handleNavigate} collapsed={collapsed} />
-                    ))}
-                </List>
-
-                <SectionLabel label="Projects" collapsed={collapsed} />
-                <List disablePadding>
-                    {projectItems.map((item, i) => (
-                        <SidebarItem key={i} item={item} onClick={handleNavigate} collapsed={collapsed} />
-                    ))}
-                </List>
-
-                {/* 新建按钮 */}
-                <Tooltip title={collapsed ? "Create new" : ""} placement="right">
-                    <ListItem
-                        onClick={() => handleNavigate("/dashboard/admin/create/course")}
-                        sx={{
-                            borderRadius: 2, mb: 0.5, cursor: "pointer",
-                            justifyContent: collapsed ? "center" : "flex-start",
-                            px: collapsed ? 1 : 2,
-                            "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
-                        }}
-                    >
-                        <ListItemIcon sx={{ minWidth: collapsed ? "auto" : 36, color: "#aaa" }}>
-                            <AddIcon />
-                        </ListItemIcon>
-                        {!collapsed && (
-                            <ListItemText
-                                primary="Create new"
-                                primaryTypographyProps={{ fontSize: 14, color: "#aaa" }}
-                            />
-                        )}
-                    </ListItem>
-                </Tooltip>
-
-                <SectionLabel label="Recents" collapsed={collapsed} />
-                <List disablePadding>
-                    {recentItems.map((item, i) => (
-                        <SidebarItem key={i} item={item} onClick={handleNavigate} collapsed={collapsed} />
+                    {navItems.map((item, i) => (
+                        <SidebarItem
+                            key={i}
+                            item={item}
+                            collapsed={collapsed}
+                            active={pathname === item.link || (item.link !== "/dashboard/admin" && pathname?.startsWith(item.link))}
+                            onClick={handleNavigate}
+                        />
                     ))}
                 </List>
             </Box>
 
-            {/* ── 底部卡片区（展开时显示）── */}
-            {!collapsed && (
-                <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-                    {/* 卡片1：升级 Pro */}
-                    <Box
-                        sx={{
-                            backgroundColor: "#fff",
-                            border: "1px solid #ebe8e3",
-                            borderRadius: 2,
-                            p: 1.5,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            cursor: "pointer",
-                            "&:hover": { backgroundColor: "#f5f0ea" },
-                        }}
-                    >
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <BoltIcon sx={{ fontSize: 18, color: "#f5a623" }} />
-                            <Typography fontSize={13} fontWeight={500}>Upgrade to Pro</Typography>
-                        </Box>
-                        <Box
-                            sx={{
-                                backgroundColor: "#7c3aed",
-                                color: "#fff",
-                                fontSize: 12, fontWeight: 600,
-                                px: 1.5, py: 0.5, borderRadius: 1.5,
-                            }}
-                        >
-                            Pro
-                        </Box>
-                    </Box>
+            {/* ── 底部导航 ── */}
+            <Box sx={{ px: 1, pb: 1 }}>
+                <List disablePadding>
+                    {bottomItems.map((item, i) => (
+                        <SidebarItem
+                            key={i}
+                            item={item}
+                            collapsed={collapsed}
+                            active={pathname === item.link}
+                            onClick={handleNavigate}
+                        />
+                    ))}
+                </List>
+            </Box>
 
-                    {/* 卡片2：分享 */}
-                    <Box
-                        sx={{
-                            backgroundColor: "#fff",
-                            border: "1px solid #ebe8e3",
-                            borderRadius: 2,
-                            p: 1.5,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                            cursor: "pointer",
-                            "&:hover": { backgroundColor: "#f5f0ea" },
-                        }}
-                    >
-                        <GroupIcon sx={{ fontSize: 18, color: "#555" }} />
-                        <Box>
-                            <Typography fontSize={13} fontWeight={500}>Share Platform</Typography>
-                            <Typography fontSize={11} color="#aaa">Invite your friends</Typography>
-                        </Box>
-                    </Box>
-                </Box>
-            )}
-
-            <Divider sx={{ borderColor: "#ebe8e3" }} />
-
-            {/* ── 底部用户状态栏 ── */}
+            {/* ── 用户状态栏 ── */}
             <Box
                 onClick={(e) => setAnchorEl(e.currentTarget)}
                 sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: collapsed ? 0 : 1.5,
-                    p: collapsed ? 1 : 1.5,
+                    px: collapsed ? 1.5 : 1.5,
+                    py: 1.5,
                     justifyContent: collapsed ? "center" : "flex-start",
                     cursor: "pointer",
-                    "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
+                    borderTop: `1px solid #e5e7eb`,
+                    "&:hover": { backgroundColor: C.hover_bg },
                 }}
             >
                 <img
-                    src={session?.user?.image ?? "/images/avatar.png"}
+                    src={fixS3Url(session?.user?.image) ?? "/images/avatar.png"}
                     alt="avatar"
                     style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
                 />
                 {!collapsed && (
                     <Box flexGrow={1} overflow="hidden">
-                        <Typography fontSize={13} fontWeight={500} color="#333" noWrap>
+                        <Typography fontSize={13} fontWeight={600} color="#141b2b" noWrap>
                             {session?.user?.name ?? "User"}
                         </Typography>
-                        <Typography fontSize={11} color="#aaa" noWrap>
+                        <Typography fontSize={11} color={C.label} noWrap>
                             {session?.user?.email ?? ""}
                         </Typography>
                     </Box>
@@ -384,19 +268,20 @@ const Sidebar = () => {
                 onClose={() => setAnchorEl(null)}
                 anchorOrigin={{ horizontal: "right", vertical: "top" }}
                 transformOrigin={{ horizontal: "left", vertical: "bottom" }}
-                slotProps={{
-                    sx: { minWidth: 220, borderRadius: 2, boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }
+                PaperProps={{
+                    sx: { minWidth: 220, borderRadius: "10px", boxShadow: "0px 12px 32px rgba(20,27,43,0.10)", border: "1px solid #e5e7eb" }
                 }}
             >
-                <Box sx={{ px: 2, py: 1.5, borderBottom: "1px solid #f0f0f0" }}>
-                    <Typography fontWeight="bold" fontSize={15}>{session?.user?.name}</Typography>
-                    <Typography variant="body2" sx={{ color: "#aaa", fontSize: 13 }}>{session?.user?.email}</Typography>
+                <Box sx={{ px: 2, py: 1.5 }}>
+                    <Typography fontWeight={600} fontSize={14} color="#141b2b">{session?.user?.name}</Typography>
+                    <Typography fontSize={12} color={C.label}>{session?.user?.email}</Typography>
                 </Box>
-                <MenuItem onClick={() => { router.push("/profile"); setAnchorEl(null); }} sx={{ py: 1.2, fontSize: 14 }}>Profile</MenuItem>
-                <MenuItem onClick={() => { router.push("/settings"); setAnchorEl(null); }} sx={{ py: 1.2, fontSize: 14 }}>Settings</MenuItem>
-                <MenuItem onClick={() => { router.push("/dashboard/admin"); setAnchorEl(null); }} sx={{ py: 1.2, fontSize: 14 }}>Dashboard</MenuItem>
-                <Divider />
-                <MenuItem onClick={() => { signOut({ callbackUrl: "/" }); setAnchorEl(null); }} sx={{ py: 1.2, fontSize: 14, color: "#e53935" }}>
+                <Divider sx={{ borderColor: "#e5e7eb" }} />
+                <MenuItem onClick={() => { router.push("/dashboard/admin/profile"); setAnchorEl(null); }} sx={{ py: 1, fontSize: 14, color: C.text }}>Profile</MenuItem>
+                <MenuItem onClick={() => { router.push("/settings"); setAnchorEl(null); }} sx={{ py: 1, fontSize: 14, color: C.text }}>Settings</MenuItem>
+                <MenuItem onClick={() => { router.push("/dashboard/admin"); setAnchorEl(null); }} sx={{ py: 1, fontSize: 14, color: C.text }}>Dashboard</MenuItem>
+                <Divider sx={{ borderColor: "#e5e7eb" }} />
+                <MenuItem onClick={() => { signOut({ callbackUrl: "/" }); setAnchorEl(null); }} sx={{ py: 1, fontSize: 14, color: "#ef4444" }}>
                     Sign out
                 </MenuItem>
             </Menu>

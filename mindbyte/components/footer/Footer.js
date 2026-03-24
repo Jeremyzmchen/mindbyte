@@ -14,6 +14,7 @@ const Footer = () => {
     const [loading, setLoading] = useState(false);
 
     const formatted = categoryinfo.reduce((totalinfo, item) => {
+        if (!item.categoryId || !item.subcategoryId) return totalinfo;
         const categoryName = item.categoryId.name;
         const categorySlug = item.categoryId.slug;
         const subcategoryName = item.subcategoryId.name;

@@ -58,7 +58,7 @@ export async function POST(request) {
         }));
 
         // 生成图片 URL
-        const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+        const imageUrl = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${fileName}`;
 
         // 更新数据库里的用户头像
         await User.findByIdAndUpdate(session.user._id, { image: imageUrl });
