@@ -56,3 +56,6 @@ yarn-error.log*
 # --- 数据库相关 (MongoDB 本地数据) ---
 dump/
 data/
+
+debug/
+reference/

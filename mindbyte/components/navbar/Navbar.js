@@ -57,7 +57,7 @@ const Navbar = () => {
                 borderBottom: "1px solid #e0e0e0",
             }}
         >
-            <Toolbar sx={{ height: 70, px: { xs: 2, md: 4 } }}>
+            <Toolbar sx={{ height: 64, px: { xs: 2, md: 4 } }}>
 
                 {/* Logo（左对齐） */}
                 <Box
