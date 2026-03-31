@@ -2,6 +2,7 @@
 
 import { Box, Typography, Button, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
 import Navbar from "@/components/navbar/Navbar";
@@ -56,6 +57,28 @@ const plans = [
 
 export default function SubscribePage() {
     const router = useRouter();
+    const [activePlan, setActivePlan] = useState(null); // "daily" | "monthly" | "yearly" | null
+
+    useEffect(() => {
+        fetch("/api/subscription/status")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.active) setActivePlan(data.plan);
+            })
+            .catch(() => {});
+    }, []);
+
+    const handleGetStarted = async (plan) => {
+        const res = await fetch("/api/subscription/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plan }),
+        });
+        const data = await res.json();
+        if (data.url) {
+            router.push(data.url); // 跳转到 Stripe 支付页面
+        }
+    };
 
     return (
         <>
@@ -189,25 +212,40 @@ export default function SubscribePage() {
                                 </Box>
 
                                 {/* CTA Button */}
-                                <Button
-                                    fullWidth
-                                    onClick={() => router.push("/payment")}
-                                    sx={{
-                                        textTransform: "none",
-                                        fontWeight: 600,
-                                        fontSize: 14,
-                                        py: 1.5,
-                                        borderRadius: "8px",
-                                        mt: 3,
-                                        background: "linear-gradient(135deg, #111827 0%, #374151 100%)",
-                                        color: "#ffffff",
-                                        "&:hover": {
-                                            background: "linear-gradient(135deg, #374151 0%, #111827 100%)",
-                                        },
-                                    }}
-                                >
-                                    Get Started
-                                </Button>
+                                {(() => {
+                                    const planKey = plan.name.toLowerCase();
+                                    const isActive = activePlan === planKey;
+                                    return (
+                                        <Button
+                                            fullWidth
+                                            disabled={isActive}
+                                            onClick={() => !isActive && handleGetStarted(planKey)}
+                                            sx={{
+                                                textTransform: "none",
+                                                fontWeight: 600,
+                                                fontSize: 14,
+                                                py: 1.5,
+                                                borderRadius: "8px",
+                                                mt: 3,
+                                                background: isActive
+                                                    ? "#e5e7eb"
+                                                    : "linear-gradient(135deg, #111827 0%, #374151 100%)",
+                                                color: isActive ? "#6b7280" : "#ffffff",
+                                                "&:hover": {
+                                                    background: isActive
+                                                        ? "#e5e7eb"
+                                                        : "linear-gradient(135deg, #374151 0%, #111827 100%)",
+                                                },
+                                                "&.Mui-disabled": {
+                                                    background: "#e5e7eb",
+                                                    color: "#6b7280",
+                                                },
+                                            }}
+                                        >
+                                            {isActive ? "Subscribed" : "Get Started"}
+                                        </Button>
+                                    );
+                                })()}
                             </Box>
                         </Grid>
                     ))}
