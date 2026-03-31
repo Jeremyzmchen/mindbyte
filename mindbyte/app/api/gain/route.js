@@ -1,3 +1,8 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/utils/authOptions";
+import dbConnect from "@/utils/dbConnect";
+import SubscriptionOrder from "@/models/SubscriptionOrder";
 import OpenAI from "openai";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -16,6 +21,24 @@ ${articleContent}
 `;
 
 export async function POST(req) {
+    await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ err: "Unauthorized" }, { status: 401 });
+    }
+
+    const now = new Date();
+    const active = await SubscriptionOrder.findOne({
+        userId: session.user._id,
+        orderStatus: "Paid",
+        "plan.expiresAt": { $gt: now },
+    });
+
+    if (!active) {
+        return NextResponse.json({ err: "Subscription required" }, { status: 403 });
+    }
+
     const { content } = await req.json();
 
     const stream = await client.chat.completions.create({

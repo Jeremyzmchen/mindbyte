@@ -3,6 +3,7 @@
 import { Box, Typography, Divider, useTheme, useMediaQuery, IconButton, Tooltip, Modal, CircularProgress, Button } from "@mui/material";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import FlutterDashIcon from "@mui/icons-material/FlutterDash";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -13,6 +14,7 @@ import Share from "./Share";
 const Title = ({ content }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const router = useRouter();
 
     const [summaryOpen, setSummaryOpen] = useState(false);
     const [summaryContent, setSummaryContent] = useState("");
@@ -86,6 +88,12 @@ const Title = ({ content }) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content: content.content }),
             });
+            if (res.status === 401 || res.status === 403) {
+                setGainOpen(false);
+                setGainLoading(false);
+                router.push("/Subscribe");
+                return;
+            }
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
             setGainLoading(false);
