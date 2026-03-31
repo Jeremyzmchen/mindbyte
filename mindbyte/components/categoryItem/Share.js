@@ -1,18 +1,9 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import {
-    Modal,
-    Box,
-    IconButton,
-    Typography,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Snackbar,
-    SnackbarContent,
-    Tooltip 
+    Modal, Box, IconButton, Typography, List, ListItem, 
+    ListItemIcon, ListItemText, Snackbar, SnackbarContent, Tooltip
 } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
 import LinkIcon from '@mui/icons-material/Link';
@@ -26,13 +17,8 @@ import RedditIcon from '@mui/icons-material/Reddit';
 import CheckIcon from '@mui/icons-material/Check';
 
 import {
-    EmailShareButton,
-    FacebookShareButton,
-    TwitterShareButton,
-    TelegramShareButton,
-    LinkedinShareButton,
-    WhatsappShareButton,
-    RedditShareButton,
+    EmailShareButton, FacebookShareButton, XShareButton,
+    TelegramShareButton, LinkedinShareButton, WhatsappShareButton, RedditShareButton,
 } from 'react-share';
 
 const SocialShareModal = () => {
@@ -46,131 +32,84 @@ const SocialShareModal = () => {
         }
     }, []);
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-
     const handleCopyLink = () => {
-        navigator.clipboard
-            .writeText(currentUrl)
-            .then(() => setSnackbarOpen(true))
-            .catch((err) => console.error('Failed to copy: ', err));
+        navigator.clipboard.writeText(currentUrl)
+            .then(() => {
+                setSnackbarOpen(true);
+                setOpen(false); // 复制后自动关闭
+            });
     };
 
-    const handleSnackbarClose = () => setSnackbarOpen(false);
-
     const socialIcons = [
-        { icon: <LinkIcon />, label: 'Copy link', onClick: handleCopyLink },
-        { component: EmailShareButton, icon: <EmailIcon />, label: 'Email' },
-        { component: FacebookShareButton, icon: <FacebookIcon />, label: 'Facebook' },
-        { component: TwitterShareButton, icon: <TwitterIcon />, label: 'X' },
-        { component: TelegramShareButton, icon: <TelegramIcon />, label: 'Telegram' },
-        { component: LinkedinShareButton, icon: <LinkedInIcon />, label: 'LinkedIn' },
-        { component: WhatsappShareButton, icon: <WhatsAppIcon />, label: 'WhatsApp' },
-        { component: RedditShareButton, icon: <RedditIcon />, label: 'Reddit' },
+        { label: 'Copy link', icon: <LinkIcon />, onClick: handleCopyLink },
+        { label: 'Facebook', icon: <FacebookIcon />, component: FacebookShareButton },
+        { label: 'X (Twitter)', icon: <TwitterIcon />, component: XShareButton },
+        { label: 'LinkedIn', icon: <LinkedInIcon />, component: LinkedinShareButton },
+        { label: 'WhatsApp', icon: <WhatsAppIcon />, component: WhatsappShareButton },
+        { label: 'Telegram', icon: <TelegramIcon />, component: TelegramShareButton },
+        { label: 'Reddit', icon: <RedditIcon />, component: RedditShareButton },
+        { label: 'Email', icon: <EmailIcon />, component: EmailShareButton },
     ];
 
     return (
-        <Box>
-<Tooltip title="Share Post" arrow>
-            <IconButton
-                 size="small"
-                 sx={{ color: "#9ca3af", "&:hover": { color: "#111827" } }}
-            
-            
-            onClick={handleOpen} aria-label="Open social share options">
-                <ShareIcon />
-            </IconButton>
+        <>
+            <Tooltip title="Share this article" arrow>
+                <IconButton
+                    size="medium"
+                    sx={{
+                        bgcolor: "#f9fafb",
+                        color: "#111827",
+                        border: "1px solid #e5e7eb",
+                        transition: "all 0.3s ease",
+                        "&:hover": { bgcolor: "#f3f4f6" }
+                    }}
+                    onClick={() => setOpen(true)}
+                >
+                    <ShareIcon sx={{ fontSize: 18 }} />
+                </IconButton>
             </Tooltip>
 
-            <Modal open={open} onClose={handleClose}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 300,
-                        bgcolor: '#ffffff',
-                        color: '#111827',
-                        boxShadow: "0px 12px 32px rgba(20,27,43,0.10)",
-                        border: "1px solid #e5e7eb",
-                        p: 4,
-                        borderRadius: '10px',
-                    }}
-                >
-                    <Typography variant="h6" component="h2">
-                        Share options
+            <Modal open={open} onClose={() => setOpen(false)}>
+                <Box sx={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 320, bgcolor: '#fff', borderRadius: '12px',
+                    boxShadow: 24, p: 3, outline: 'none'
+                }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, textAlign: 'center' }}>
+                        Share Article
                     </Typography>
-                    <List>
-                        {socialIcons.map((social, index) => {
-                            if (social.label === 'Copy link') {
-                                return (
-                                    <ListItem 
-                                   
-                                    key={index} onClick={social.onClick}>
-                                        <ListItemIcon
-                                        
-                                        size="small"
-                                        sx={{ color: "#fff", "&:hover": { color: "#f0c14b" } }}
-                                      
-                                      >{social.icon}</ListItemIcon>
-                                        <ListItemText primary={social.label} />
-                                    </ListItem>
-                                );
-                            } else {
-                                const ShareButtonComponent = social.component;
-                                return (
-                                    <ListItem key={index}>
-                                        <ListItemIcon  
-                                             size="small"
-                                             sx={{ color: "#fff", "&:hover": { color: "green" } }}
-                                        
-                                        
-                                        >
-                                            {/* Render a div instead of a button */}
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    cursor: 'pointer',
-                                                }}
-                                            >
-                                                <ShareButtonComponent
-                                                    url={currentUrl}
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        cursor: 'pointer',
-                                                    }}
-                                                >
-                                                    {social.icon}
-                                                </ShareButtonComponent>
-                                            </div>
-                                        </ListItemIcon>
-                                        <ListItemText primary={social.label} />
-                                    </ListItem>
-                                );
-                            }
-                        })}
+                    <List sx={{ pt: 0 }}>
+                        {socialIcons.map((item, index) => (
+                            <ListItem 
+                                key={index} 
+                                disablePadding
+                                sx={{ 
+                                    borderRadius: '8px', mb: 0.5,
+                                    '&:hover': { bgcolor: '#f9fafb' } 
+                                }}
+                            >
+                                {item.component ? (
+                                    <item.component url={currentUrl} style={{ width: '100%', display: 'flex', padding: '10px 16px' }}>
+                                        <ListItemIcon sx={{ minWidth: 40, color: '#374151' }}>{item.icon}</ListItemIcon>
+                                        <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
+                                    </item.component>
+                                ) : (
+                                    <Box onClick={item.onClick} sx={{ width: '100%', display: 'flex', padding: '10px 16px', cursor: 'pointer' }}>
+                                        <ListItemIcon sx={{ minWidth: 40, color: '#374151' }}>{item.icon}</ListItemIcon>
+                                        <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />
+                                    </Box>
+                                )}
+                            </ListItem>
+                        ))}
                     </List>
                 </Box>
             </Modal>
 
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleSnackbarClose}
-                action={
-                    <IconButton onClick={handleSnackbarClose} color="inherit">
-                        <CheckIcon />
-                    </IconButton>
-                }
-            >
-                <SnackbarContent
-                    sx={{ bgcolor: 'success.main', color: 'white' }}
-                    message="Link copied to clipboard!"
-                />
+            <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)}>
+                <SnackbarContent sx={{ bgcolor: '#111827' }} message="Link copied!" />
             </Snackbar>
-        </Box>
+        </>
     );
 };
 

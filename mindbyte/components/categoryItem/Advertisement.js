@@ -5,86 +5,74 @@ import { Box, Typography, IconButton, useMediaQuery, useTheme } from '@mui/mater
 import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 
-const ads = [
-    { image: '/images/ads1.png', link: 'https://github.com/Jeremyzmchen', title: 'Ad Title 1', desc: 'Ad description 1' },
-    { image: '/images/ads2.png', link: 'https://github.com/Jeremyzmchen', title: 'Ad Title 2', desc: 'Ad description 2' },
-    { image: '/images/ads3.png', link: 'https://github.com/Jeremyzmchen', title: 'Ad Title 3', desc: 'Ad description 3' },
-];
-
-const Advertisement = () => {
+const Advertisement = ({ adData = [] }) => {
     const [currentAdIndex, setCurrentAdIndex] = useState(0);
     const [showAd, setShowAd] = useState(true);
 
-    // 广告位手机端电脑端主题央视切换
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // 定时器，广告图片轮播
     useEffect(() => {
+        if (adData.length <= 1) return;
         const interval = setInterval(() => {
-            setCurrentAdIndex((prevIndex) => (prevIndex + 1) % ads.length);
-        }, 1000);
+            setCurrentAdIndex((prevIndex) => (prevIndex + 1) % adData.length);
+        }, 3000);
         return () => clearInterval(interval);
-    }, []);
+    }, [adData]);
 
-    const handleCloseAd = (e) => {
-        e.stopPropagation();
-        setShowAd(false);
-    };
-
-    const handleAdClick = () => {
-        const currentAd = ads[currentAdIndex];
-        // 广告链接跳转
-        if (currentAd?.link) window.open(currentAd.link, '_blank');
-    };
-
-    if (!showAd) return null;
+    if (!showAd || adData.length === 0) return null;
 
     return (
         <Box
-            onClick={handleAdClick}
+            onClick={() => adData[currentAdIndex]?.link && window.open(adData[currentAdIndex].link, '_blank')}
             sx={{
                 position: 'relative',
-                width: isMobile ? '85%' : '250px',
-                height: isMobile ? '250px' : '400px',
-                margin: 'auto',
-                marginTop: '20px',
-                borderRadius: '8px',
+                width: '100%',
+                aspectRatio: '4 / 3',
+                maxHeight: '300px',
+                borderRadius: '12px',
                 overflow: 'hidden',
                 cursor: 'pointer',
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.02)' },
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                bgcolor: '#fff',
             }}
         >
-            {/* 广告图片 */}
             <Image
-                src={ads[currentAdIndex].image}
-                alt={`Ad ${currentAdIndex + 1}`}
+                src={adData[currentAdIndex].image}
+                alt={adData[currentAdIndex].title}
                 fill
                 style={{ objectFit: 'cover' }}
+                sizes="(max-width: 1200px) 100vw, 25vw"
             />
 
             {/* 关闭按钮 */}
             <IconButton
-                onClick={handleCloseAd}
+                onClick={(e) => { e.stopPropagation(); setShowAd(false); }}
                 sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    position: 'absolute', top: 8, right: 8,
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    backdropFilter: 'blur(4px)',
                     color: '#fff',
-                    zIndex: 1,
-                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' },
+                    padding: '4px',
+                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.5)' },
                 }}
             >
-                <CloseIcon />
+                <CloseIcon fontSize="small" />
             </IconButton>
 
-            {/* 广告文字 */}
-            <Box sx={{ position: 'absolute', bottom: 16, left: 16, color: '#fff', zIndex: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    {ads[currentAdIndex].title}
-                </Typography>
-                <Typography variant="body2">
-                    {ads[currentAdIndex].desc}
+            {/* 文字遮罩 */}
+            <Box sx={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0,
+                padding: '20px 10px 10px',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                color: '#fff',
+                zIndex: 1
+            }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>
+                    {adData[currentAdIndex].title}
                 </Typography>
             </Box>
         </Box>

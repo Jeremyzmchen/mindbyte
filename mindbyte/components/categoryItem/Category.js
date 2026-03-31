@@ -14,7 +14,7 @@ import Footer from '@/components/footer/Footer';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import Accordionleft from "./Accordion";
-import Centerads from  "./Centerads"
+import Centerads from  "./SubscriptionAd"
 import Content from "./Content"
 import Title from "./Title"
 import SimilarReads from "./SimilarReads.js";
