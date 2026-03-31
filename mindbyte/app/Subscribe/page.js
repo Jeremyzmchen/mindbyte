@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Typography, Button, Grid } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { Box, Typography, Button, Grid, Alert, Collapse } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import CheckIcon from "@mui/icons-material/Check";
 import StarIcon from "@mui/icons-material/Star";
@@ -57,7 +57,11 @@ const plans = [
 
 export default function SubscribePage() {
     const router = useRouter();
-    const [activePlan, setActivePlan] = useState(null); // "daily" | "monthly" | "yearly" | null
+    const searchParams = useSearchParams();
+    const [activePlan, setActivePlan] = useState(null);
+
+    const isSuccess = searchParams.get("success") === "true";
+    const isCancelled = searchParams.get("cancelled") === "true";
 
     useEffect(() => {
         fetch("/api/subscription/status")
@@ -84,6 +88,18 @@ export default function SubscribePage() {
         <>
             <Navbar />
             <Box sx={{ bgcolor: "#f9fafb", minHeight: "100vh", py: { xs: 6, md: 10 }, px: { xs: 2, md: 4 } }}>
+
+                {/* Success / Cancel alerts */}
+                <Collapse in={isSuccess || isCancelled}>
+                    <Alert
+                        severity={isSuccess ? "success" : "warning"}
+                        sx={{ maxWidth: 600, mx: "auto", mb: 4, borderRadius: "10px", justifyContent: "center", "& .MuiAlert-message": { textAlign: "center" } }}
+                    >
+                        {isSuccess
+                            ? "Payment successful! Your subscription is now active."
+                            : "Payment cancelled. Your subscription was not activated."}
+                    </Alert>
+                </Collapse>
 
                 {/* Header */}
                 <Box sx={{ textAlign: "center", mb: { xs: 6, md: 10 } }}>
